@@ -376,10 +376,13 @@ void CreatePipelineInternal(GraphicContext& graphics, PipelineCache::Pipeline& p
 	vertex_input_info.vertexAttributeDescriptionCount = vertex_input.attribute_count;
 	vertex_input_info.pVertexAttributeDescriptions    = input_attr;
 
+	vk::PipelineVertexInputStateCreateInfo fallback_vertex_input_info {};
+
 	vk::PipelineInputAssemblyStateCreateInfo input_assembly {};
-	input_assembly.topology = static_params.topology;
+	input_assembly.topology =
+	    mesh_fallback ? vk::PrimitiveTopology::eTriangleList : static_params.topology;
 	input_assembly.primitiveRestartEnable =
-	    static_params.primitive_restart_enable ? VK_TRUE : VK_FALSE;
+	    !mesh_fallback && static_params.primitive_restart_enable ? VK_TRUE : VK_FALSE;
 
 	vk::PipelineViewportDepthClipControlCreateInfoEXT depth_clip_control {};
 	depth_clip_control.negativeOneToOne = (static_params.negative_one_to_one ? VK_TRUE : VK_FALSE);
@@ -554,8 +557,9 @@ void CreatePipelineInternal(GraphicContext& graphics, PipelineCache::Pipeline& p
 	pipeline_info.pNext                    = &rendering_info;
 	pipeline_info.stageCount               = shader_stage_count;
 	pipeline_info.pStages                  = shader_stages;
-	pipeline_info.pVertexInputState        = mesh && !mesh_fallback ? nullptr : &vertex_input_info;
-	pipeline_info.pInputAssemblyState      = mesh && !mesh_fallback ? nullptr : &input_assembly;
+	pipeline_info.pVertexInputState =
+	    mesh ? (mesh_fallback ? &fallback_vertex_input_info : nullptr) : &vertex_input_info;
+	pipeline_info.pInputAssemblyState = mesh && !mesh_fallback ? nullptr : &input_assembly;
 	vk::PipelineTessellationStateCreateInfo tessellation_state {};
 	tessellation_state.patchControlPoints =
 	    tessellation ? vs_input_info.tess.input_control_points : 3u;

@@ -548,6 +548,11 @@ uint64_t CommandScheduler::Submit(SubmitInfo submit) {
 			     m_command.m_mesh_fallback_submit_id, m_command.m_mesh_fallback_groups_x,
 			     m_command.m_mesh_fallback_groups_y, m_command.m_mesh_fallback_index_count,
 			     m_command.m_mesh_fallback_stride_dwords, m_command.m_mesh_fallback_bytes);
+			std::printf("Mesh fallback recorded in failed command buffer: submit=%" PRIu64
+			            " groups=%ux%u indices=%u stride_dwords=%u output_bytes=%" PRIu64 "\n",
+			            m_command.m_mesh_fallback_submit_id, m_command.m_mesh_fallback_groups_x,
+			            m_command.m_mesh_fallback_groups_y, m_command.m_mesh_fallback_index_count,
+			            m_command.m_mesh_fallback_stride_dwords, m_command.m_mesh_fallback_bytes);
 		}
 		if (m_last_mesh_fallback_submission.valid) {
 			const auto& mesh = m_last_mesh_fallback_submission;
@@ -556,8 +561,14 @@ uint64_t CommandScheduler::Submit(SubmitInfo submit) {
 			     "output_bytes=%" PRIu64 "\n",
 			     mesh.tick, mesh.submit_id, mesh.groups_x, mesh.groups_y, mesh.index_count,
 			     mesh.stride_dwords, mesh.output_bytes);
+			std::printf("Most recent successfully submitted mesh fallback: tick=%" PRIu64
+			            " submit=%" PRIu64 " groups=%ux%u indices=%u stride_dwords=%u "
+			            "output_bytes=%" PRIu64 "\n",
+			            mesh.tick, mesh.submit_id, mesh.groups_x, mesh.groups_y, mesh.index_count,
+			            mesh.stride_dwords, mesh.output_bytes);
 		}
 		LOGE("Recent successful Vulkan queue submissions (oldest first):\n");
+		std::printf("Recent successful Vulkan queue submissions (oldest first):\n");
 		for (size_t i = 0; i < m_recent_submission_count; i++) {
 			const auto index = (m_recent_submission_next + RecentSubmissionCount -
 			                    m_recent_submission_count + i) % RecentSubmissionCount;
@@ -571,13 +582,26 @@ uint64_t CommandScheduler::Submit(SubmitInfo submit) {
 				     debug.arg2, debug.arg3, debug.arg4, debug.shader_hash, debug.mesh_submit_id,
 				     debug.mesh_groups_x, debug.mesh_groups_y, debug.mesh_index_count,
 				     debug.mesh_stride_dwords, debug.mesh_output_bytes);
+				std::printf("  tick=%" PRIu64 " op=%u submit=%" PRIu64
+				            " args=%u,%u,%u,%u,0x%016" PRIx64 " shader_hash=0x%016" PRIx64
+				            " mesh_fallback=%" PRIu64
+				            " groups=%ux%u indices=%u stride_dwords=%u output_bytes=%" PRIu64 "\n",
+				            debug.tick, debug.op, debug.submit_id, debug.arg0, debug.arg1,
+				            debug.arg2, debug.arg3, debug.arg4, debug.shader_hash, debug.mesh_submit_id,
+				            debug.mesh_groups_x, debug.mesh_groups_y, debug.mesh_index_count,
+				            debug.mesh_stride_dwords, debug.mesh_output_bytes);
 			} else {
 				LOGE("  tick=%" PRIu64 " op=%u submit=%" PRIu64
 				     " args=%u,%u,%u,%u,0x%016" PRIx64 " shader_hash=0x%016" PRIx64 "\n",
 				     debug.tick, debug.op, debug.submit_id, debug.arg0, debug.arg1,
 				     debug.arg2, debug.arg3, debug.arg4, debug.shader_hash);
+				std::printf("  tick=%" PRIu64 " op=%u submit=%" PRIu64
+				            " args=%u,%u,%u,%u,0x%016" PRIx64 " shader_hash=0x%016" PRIx64 "\n",
+				            debug.tick, debug.op, debug.submit_id, debug.arg0, debug.arg1,
+				            debug.arg2, debug.arg3, debug.arg4, debug.shader_hash);
 			}
 		}
+		std::fflush(stdout);
 	}
 	EXIT_NOT_IMPLEMENTED(result != vk::Result::eSuccess);
 	auto& debug = m_recent_submissions[m_recent_submission_next];
