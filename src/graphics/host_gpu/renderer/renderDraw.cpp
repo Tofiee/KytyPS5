@@ -912,6 +912,13 @@ bool RenderExecutor::PrepareDrawRenderState(CommandBuffer& buffer, const DrawCal
 	                  (color_output_mask != 0 ||
 	                   PixelShaderHasDepthOrCoverageSideEffects(shader_regs));
 	RefreshShaders(buffer, draw, color_output_mask, state);
+	const bool tess_active = buffer.GetUserConfig().GetPrimType() == Prospero::PrimitiveType::kPatch;
+	for (uint32_t i = 0; i < (tess_active ? 3u : 1u); i++) {
+		if (!state.programs.vertex[i]) return false;
+	}
+	if (state.ps_active && !state.programs.pixel) {
+		return false;
+	}
 	uint32_t mrt_mask = 0;
 	if (state.ps_active) {
 		for (const auto& output: state.ps_input_info.stage.program->info.outputs) {

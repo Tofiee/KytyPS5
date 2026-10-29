@@ -738,14 +738,18 @@ bool SrtWalker::EvaluateRawRead(const Inst& inst, uint64_t& result) {
 			return false;
 		}
 	}
+	if (base == 0u || address < 0x10000ull) {
+		result = 0u;
+		return true;
+	}
 	uint32_t word = 0;
 	const auto reader = vector ? m_runtime.read_specialization_memory : m_runtime.read_memory;
 	if (reader != nullptr) {
 		if (!reader(m_runtime.userdata, address, {&word, 1})) {
-			return false;
+			word = 0u;
 		}
 	} else {
-		return false;
+		word = 0u;
 	}
 	result = word;
 	return true;
