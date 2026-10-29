@@ -38,8 +38,10 @@ bool SrtReadCapture::ReadOrdinary(void* userdata, uint64_t address, std::span<ui
 	auto& capture = *static_cast<SrtReadCapture*>(userdata);
 	if (capture.m_source.read_memory != nullptr) {
 		if (!capture.m_source.read_memory(capture.m_source.userdata, address, values)) return false;
+	} else if (capture.m_source.read_specialization_memory != nullptr) {
+		if (!capture.m_source.read_specialization_memory(capture.m_source.userdata, address, values)) return false;
 	} else {
-		std::memcpy(values.data(), reinterpret_cast<const void*>(address), values.size_bytes());
+		return false;
 	}
 	capture.m_ranges.emplace_back(address, values.size_bytes());
 	return true;
