@@ -351,6 +351,7 @@ struct PipelineCache::ProgramCache {
 		ShaderRecompiler::IR::SrtRuntime             runtime {
 		    .user_data                  = user_data,
 		    .shader_base                = params.Base(),
+			.read_memory 				= ReadShaderGuestMemory,
 		    .read_specialization_memory = ReadShaderGuestMemory,
 		};
 		if constexpr (std::is_same_v<InputInfo, ShaderComputeInputInfo>) {
