@@ -899,7 +899,8 @@ PipelineCache::GraphicsPrograms PipelineCache::GetGraphicsPrograms(
 	                       ? ShaderRecompiler::IR::PushData::GraphicsDrawDwords(
 	    mesh_active, object_primitive_id)
 	                       : ShaderRecompiler::IR::PushData::MeshFallbackDrawDwordCount)
-	                : 0;
+	                : ShaderRecompiler::IR::PushData::GraphicsDrawDwords(
+	                      false, object_primitive_id);
 	if (pixel_active) {
 		result.pixel = m_program_cache->Get(pixel_params, pixel_info, push_data_cursor);
 	}
